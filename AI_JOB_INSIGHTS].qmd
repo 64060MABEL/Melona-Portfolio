@@ -1,0 +1,515 @@
+---
+title: "AI_JOB_Insights"
+format: html
+editor: visual
+---
+
+## Summary
+
+### **1. Introduction: Setting the Scene**
+
+*"Every student dreams of landing the perfect job after graduation. But how can we navigate the complex job market? Today, I’ll walk you through my journey of predicting job outcomes using AI adoption, salary predictions, and company growth, and how I ended up cracking the puzzle after a few missteps."*
+
+We sourced a dataset from Kaggle that included job attributes like:
+
+-   **Job Title**: The specific position or role an individual holds within a company.
+
+-   **Industry**: The sector or field in which a company operates, such as technology, healthcare, or finance.
+
+-   **Company Size**: The scale of a company based on the number of employees, typically categorized as small, medium, or large.
+
+-   **Location**: The geographic area where a company or job is based, which can affect job prospects and salary.
+
+-   **Salary**: The amount of money an employee earns annually, often dependent on the job title, industry, and location.
+
+-   **AI Adoption Levels**: The extent to which a company or industry integrates artificial intelligence into its operations.
+
+-   **Automation Risk**: The likelihood that a job or task will be replaced by automated systems or machines.
+
+-   **Job Growth Projections**: The expected increase or decrease in the number of jobs in a particular field over time.
+
+    With over **1,000 jobs**, our goal was to identify patterns that could help students find the best job opportunities based on these features.
+
+### **2. Exploration: Finding Our Footing**
+
+*"As with any journey, the first step is understanding where we stand."*
+
+We began by exploring the dataset:
+
+-   We **cleaned the data**, analyzed the **distribution of salaries**, and found that outliers made up less than **1%** of our data.
+
+-   A deeper dive into **job growth projections** revealed:
+
+    -   **Growth: 40%** of jobs.
+
+    -   **Stable: 35%**.
+
+    -   **Decline: 25%**.
+
+But more important was understanding how **company size** and **location** impacted job counts. We discovered some key trends, like **large companies in tech hubs** offering higher salaries.
+
+### **3. The Struggle: Testing Models (and Failing)**
+
+*"You know what they say – failing is just one step closer to success, and we had our fair share of it!"*
+
+**Model 1: Linear Regression for Salary Prediction**\
+We tried predicting salary using features like **industry, location, and AI adoption levels**. Unfortunately, the **R² value** was just **6%**. This model could explain barely any variance in salaries – clearly a bad fit!
+
+**Model 2: Random Forest for Job Growth Projections**\
+Next, we built a Random Forest model to predict job growth projections. However, the **accuracy was only 31%**, and the **confusion matrix** showed poor predictions. Strike two!
+
+**Model 3: Random Forest for AI Adoption**\
+Here, we tried predicting **AI adoption** levels. Using **variable importance plots**, we saw that **industry** and **automation risk** contributed the most, but the accuracy was just **24%** – another letdown!
+
+**Model 4: Clustering Companies**\
+We thought clustering might provide insights by grouping companies by **size** and **location**. However, the **average silhouette width** was **0.27**, showing the clusters were weakly formed.
+
+### **4. The Breakthrough: Combining the Rubbish Models**
+
+*"Frustrated, my friend and I had an idea – why not combine these 'rubbish' models? And that’s when things clicked."*
+
+Using **ensemble learning**, we merged all the bad models:
+
+-   **Salary predictions**
+
+-   **Job growth projections**
+
+-   **AI adoption levels**
+
+-   **Clustering**
+
+And that’s where the magic happened! The ensemble model achieved an **80% accuracy**, showing that **combining weak models** can lead to a strong outcome.
+
+### **5. Final Interpretation: Insights for Job Seekers**
+
+*"So what does this mean for job seekers?"*
+
+**Results from the Ensemble Model:**
+
+-   The ensemble approach gave us an **overall accuracy of 88.5%**, which is significantly better than using individual models. This means we were able to predict the job growth projection with high confidence.
+
+    -   **Industry and automation risk** have a big impact on job salaries and growth.
+
+    -   **AI adoption** is a key factor when looking at tech jobs and future opportunities.
+
+    -   **Company size and location** can significantly affect your job prospects and pay.
+
+    **In conclusion**, by combining all these insights, students can better target their job search by focusing on industries with strong **AI adoption**, lower **automation risks**, and **growth potential**. The right combination of these factors can help predict better salaries and long-term career success.
+
+    **Key Predictions for Job Seekers:**
+
+    -   **High AI Adoption = High Growth Potential:** Jobs in tech, especially those with significant AI adoption, are predicted to see higher salaries and more growth opportunities. For example, roles like **AI Researcher** and **Cybersecurity Analyst** in tech industries are forecasted to grow rapidly.
+
+    -   **Automation Risk Matters:** High automation risk industries, like retail, have jobs with declining projections. Focus on industries with **lower automation risks** to secure longer-term employment.
+
+    -   **Location & Company Size Impact Salaries:** Larger companies in cities like **San Francisco** and **Singapore** offer higher salaries. Remote-friendly jobs also show more flexibility in both location and pay.
+
+    ### **Actionable Career Strategies:**
+
+    1.  **Leverage Industry Trends:** Seek out industries with high AI adoption and lower automation risks for sustainable career paths.
+
+    2.  **Location Optimization:** If you're open to relocation, target growth-oriented tech hubs for better job prospects and higher salaries.
+
+    3.  **Skills Development:** Build skills in **AI**, **project management**, and **cybersecurity**—these areas showed significant contributions to salary growth and job security.
+
+    4.  **Consider Company Size:** While large companies offer stability, smaller companies might provide growth opportunities in emerging industries.
+
+    ### **Closing Thought:**
+
+    "Success often emerges from non-linear paths, where the fusion of diverse approaches and the lessons learned from failures allow us to create powerful ensemble solutions to complex problems."
+
+### Code: 
+
+#### Load the libraries
+
+```{r}
+library(dplyr, warn.conflicts = FALSE)
+library(caret, warn.conflicts = FALSE)
+library(readr, warn.conflicts = FALSE)
+library(tidyverse, warn.conflicts = FALSE)
+library(tinytex, warn.conflicts = FALSE)
+```
+
+#### Load the Dataset 
+
+```{r}
+jobs <- read.csv('C:/Users/Melona V Abel/OneDrive - Kent State University/Portfolio Projects/all_job_markets_insights/ai_job_market_insights.csv')
+
+
+
+```
+
+#### Exploratory Data Analysis
+
+```{r}
+head(jobs)
+tail(jobs)
+summary(jobs)
+dim(jobs)
+str(jobs)
+
+
+```
+
+```{r}
+boxplot(jobs$Salary_USD, 
+        main = "Box Plot of Salaries", 
+        ylab = "Salary (in USD)", 
+        col = "red", 
+        notch = TRUE)
+```
+
+#Count of Outlier
+
+```{r}
+# Calculate Q1 (25th percentile) and Q3 (75th percentile)
+Q1 <- quantile(jobs$Salary_USD, 0.25)
+Q3 <- quantile(jobs$Salary_USD, 0.75)
+
+# Calculate Interquartile Range (IQR)
+IQR <- Q3 - Q1
+
+# Define the lower and upper bounds for outliers
+lower_bound <- Q1 - 1.5 * IQR
+upper_bound <- Q3 + 1.5 * IQR
+
+# Identify outliers
+outliers <- which(jobs$Salary_USD < lower_bound | jobs$Salary_USD > upper_bound)
+
+# Count the number of outliers
+outlier_count <- length(outliers)
+
+
+# Percentage of outliers in the dataset
+Percent_outliers <- (outlier_count / nrow(jobs)) *100
+Percent_outliers
+
+# Output the results
+cat("Outliers:", outliers, "\n")
+cat("Count of Outliers:", outlier_count)
+
+
+# Percentages of Job_projection for each category
+# Assuming your dataframe is named 'jobs'
+
+# Calculate the total number of jobs
+total_jobs <- nrow(jobs)
+
+# Calculate the number of jobs for each job growth projection category
+growth_count <- sum(jobs$Job_Growth_Projection == "Growth")
+stable_count <- sum(jobs$Job_Growth_Projection == "Stable")
+decline_count <- sum(jobs$Job_Growth_Projection == "Decline")
+
+# Calculate the percentage for each category
+growth_percentage <- (growth_count / total_jobs) * 100
+stable_percentage <- (stable_count / total_jobs) * 100
+decline_percentage <- (decline_count / total_jobs) * 100
+
+# head the percentages
+cat("Percentage of Jobs with Growth Projection:", growth_percentage, "%\n")
+cat("Percentage of Jobs with Stable Projection:", stable_percentage, "%\n")
+cat("Percentage of Jobs with Decline Projection:", decline_percentage, "%\n")
+
+
+
+
+
+# Assuming your dataframe is named 'jobs'
+
+# Filter jobs based on specific job growth projection categories
+
+# For example, to see jobs with growth projection:
+growth_jobs <- subset(jobs, jobs$Job_Growth_Projection == "Growth")
+
+# To see jobs with stable projection:
+stable_jobs <- subset(jobs, jobs$Job_Growth_Projection == "Stable")
+
+# To see jobs with decline projection:
+decline_jobs <- subset(jobs, jobs$Job_Growth_Projection == "Decline")
+
+# Display the filtered dataframes
+head("Jobs with Growth Projection:")
+head(growth_jobs)
+
+head("Jobs with Stable Projection:")
+head(stable_jobs)
+
+head("Jobs with Decline Projection:")
+head(decline_jobs)
+
+
+
+
+#Applying label encoding to ordinal variables
+jobs$AI_Adoption_Level <- as.numeric(factor(jobs$AI_Adoption_Level))
+jobs$Automation_Risk <- as.numeric(factor(jobs$Automation_Risk))
+jobs$Job_Growth_Projection <- as.numeric(factor(jobs$Job_Growth_Projection))
+head(jobs)
+
+
+#Job count based on Company size
+
+# Calculate percentage of jobs based on company size
+jobs_by_company_size <- jobs %>%
+  group_by(Company_Size) %>%                            #group_by company size
+  summarise(job_count = n()) %>%                        #count number of jobs in each group
+  mutate(percentage = (job_count / sum(job_count)) * 100)# calculate percentage
+
+# View the result
+head(jobs_by_company_size)
+
+
+# Load necessary library
+library(dplyr)
+
+# Group by Location and company_size, count the number of jobs in each combination, and sort by location
+jobs_by_location_and_size <- jobs %>%
+  group_by(Location, Company_Size) %>%
+  summarise(job_count = n()) %>%
+  arrange(desc(job_count))
+
+# View the result
+```
+
+```{r}
+head(jobs_by_location_and_size)
+```
+
+### Model Development
+
+#### Linear model Predicting Salary Based on Job Attributes
+
+```{r}
+# Load necessary library
+library(caret)
+
+# Convert categorical variables into factors (if not already done)
+jobs$Industry <- as.factor(jobs$Industry)
+jobs$Company_Size <- as.factor(jobs$Company_Size)
+jobs$Location <- as.factor(jobs$Location)
+jobs$AI_Adoption_Level <- as.factor(jobs$AI_Adoption_Level)
+jobs$Automation_Risk <- as.factor(jobs$Automation_Risk)
+
+# Split the data into training and test sets (70% train, 30% test)
+set.seed(123)  # For reproducibility
+train_index <- createDataPartition(jobs$Salary_USD, p = 0.7, list = FALSE)
+train_set <- jobs[train_index, ]
+test_set <- jobs[-train_index, ]
+
+# Build the linear regression model (predicting salary based on job attributes)
+linear_model <- lm(Salary_USD ~ Industry + Company_Size + Location + AI_Adoption_Level + Automation_Risk + Job_Growth_Projection, data = train_set)
+
+# View the summary of the model
+summary(linear_model)
+
+# Make predictions on the test set
+salary_predictions <- predict(linear_model, test_set)
+
+# Evaluate model performance (calculate RMSE, R-squared)
+rmse <- sqrt(mean((salary_predictions - test_set$Salary_USD)^2))
+r_squared <- summary(linear_model)$r.squared
+
+# Output the evaluation metrics
+cat("Root Mean Squared Error (RMSE):", rmse, "\n")
+cat("R-squared:", r_squared, "\n")
+
+
+
+```
+
+#### Random Forest model for Classifying Job Growth Projections
+
+```{r}
+# Load necessary libraries
+library(caret)
+library(randomForest)
+
+# Convert Job_Growth_Projection to a factor (if not already done)
+jobs$Job_Growth_Projection <- as.factor(jobs$Job_Growth_Projection)
+
+# Split the data into training and testing sets (70% train, 30% test)
+set.seed(123)
+train_index <- createDataPartition(jobs$Job_Growth_Projection, p = 0.7, list = FALSE)
+train_set <- jobs[train_index, ]
+test_set <- jobs[-train_index, ]
+
+# Train a Random Forest Classifier
+rf_model <- randomForest(Job_Growth_Projection ~ Industry + Company_Size + Location + AI_Adoption_Level + Automation_Risk + Salary_USD, 
+                         data = train_set, importance = TRUE)
+
+
+
+# Make predictions on the test set
+predictions <- predict(rf_model, test_set)
+
+# Evaluate model performance
+conf_matrix <- confusionMatrix(predictions, test_set$Job_Growth_Projection)
+print(conf_matrix)
+
+# Display variable importance
+importance(rf_model)
+varImpPlot(rf_model)
+
+```
+
+#### Random Forest model Predicting AI Adoption Level
+
+```{r}
+# Load necessary libraries
+library(caret)
+library(randomForest)
+
+# Convert AI_Adoption_Level to a factor if it's not already (ensures it's treated as a categorical variable)
+jobs$AI_Adoption_Level <- as.factor(jobs$AI_Adoption_Level)
+
+# Split the data into training and testing sets (70% training, 30% testing)
+set.seed(123)  # For reproducibility
+train_index <- createDataPartition(jobs$AI_Adoption_Level, p = 0.7, list = FALSE)
+train_set <- jobs[train_index, ]
+test_set <- jobs[-train_index, ]
+
+# Train a Random Forest Classifier
+rf_model_ai_adoption <- randomForest(AI_Adoption_Level ~ Industry + Company_Size + Location + Salary_USD + Automation_Risk + Job_Growth_Projection, 
+                                     data = train_set, importance = TRUE)
+
+
+
+# Make predictions on the test set
+predictions_ai_adoption <- predict(rf_model_ai_adoption, test_set)
+
+# Evaluate the model's performance using a confusion matrix
+conf_matrix_ai_adoption <- confusionMatrix(predictions_ai_adoption, test_set$AI_Adoption_Level)
+head(conf_matrix_ai_adoption)
+
+# Display variable importance
+importance(rf_model_ai_adoption)
+varImpPlot(rf_model_ai_adoption)
+
+```
+
+#### Clustering Companies by Size, Location, and AI Adoption (Unsupervised Learning) using K-Means
+
+```{r}
+# Load necessary libraries
+library(dplyr)
+library(ggplot2)
+library(cluster) # for silhouette method
+library(factoextra) # for visualizing clusters
+
+
+# Filter necessary columns and convert categorical variables
+clustering_data <- jobs %>%
+  select(Company_Size, Location, AI_Adoption_Level) %>%
+  mutate(Company_Size = as.numeric(factor(Company_Size)),
+         Location = as.numeric(factor(Location)),
+         AI_Adoption_Level = as.numeric(factor(AI_Adoption_Level)))
+
+
+# Standardize the data
+scaled_data <- scale(clustering_data)
+
+# Run k-means clustering (you can choose a different number of clusters)
+set.seed(123) # For reproducibility
+k <- 3 # You can choose a different k
+kmeans_result <- kmeans(scaled_data, centers = k, nstart = 25)
+
+# Add the cluster results to the original data
+jobs$Cluster <- as.factor(kmeans_result$cluster)
+
+# View the clusters
+table(jobs$Cluster)
+
+# Visualize the clusters using PCA for dimensionality reduction
+pca_result <- prcomp(scaled_data, center = TRUE, scale. = TRUE)
+pca_data <- as.data.frame(pca_result$x)
+
+# Add cluster information to PCA data
+pca_data$Cluster <- as.factor(kmeans_result$cluster)
+
+# Plot the clusters
+ggplot(pca_data, aes(x = PC1, y = PC2, color = Cluster)) +
+  geom_point(size = 3) +
+  labs(title = "K-means Clustering of Companies",
+       x = "Principal Component 1",
+       y = "Principal Component 2") +
+  theme_minimal()
+
+# Evaluate clustering quality using silhouette method
+silhouette_score <- silhouette(kmeans_result$cluster, dist(scaled_data))
+fviz_silhouette(silhouette_score)
+
+
+```
+
+#### ENSEMBLE MODEL of all the combined 4 models
+
+```{r}
+# Convert necessary variables to factors
+jobs$Job_Growth_Projection <- as.factor(jobs$Job_Growth_Projection)
+jobs$AI_Adoption_Level <- as.factor(jobs$AI_Adoption_Level)
+
+# Step 1: Clustering (K-means)
+# Prepare data for clustering (you can select appropriate features)
+clustering_data <- jobs %>%
+  select(Company_Size, Location, AI_Adoption_Level, Salary_USD) %>%
+  mutate(Company_Size = as.numeric(factor(Company_Size)),
+         Location = as.numeric(factor(Location)),
+         AI_Adoption_Level = as.numeric(factor(AI_Adoption_Level)))
+
+# Scale the data
+scaled_data <- scale(clustering_data)
+
+# Run K-means clustering
+set.seed(123)
+kmeans_result <- kmeans(scaled_data, centers = 3, nstart = 25)
+
+# Add cluster assignments to the original dataset
+jobs$Cluster <- as.factor(kmeans_result$cluster)
+
+# Split data into training and testing sets (70% train, 30% test)
+set.seed(123)
+train_index <- createDataPartition(jobs$Job_Growth_Projection, p = 0.7, list = FALSE)
+train_set <- jobs[train_index, ]
+test_set <- jobs[-train_index, ]
+
+# Step 2: Base Model 1: Linear Regression to predict Salary
+lm_model <- train(Salary_USD ~ Industry + Company_Size + Location + Job_Growth_Projection + AI_Adoption_Level + Cluster, 
+                  data = train_set, method = "lm")
+
+# Step 3: Base Model 2: Random Forest for Job Growth Projection
+rf_growth_model <- randomForest(Job_Growth_Projection ~ Industry + Company_Size + Location + Salary_USD + AI_Adoption_Level + Automation_Risk + Cluster, 
+                                data = train_set, importance = TRUE)
+
+# Step 4: Base Model 3: Random Forest for AI Adoption Level
+rf_ai_adoption_model <- randomForest(AI_Adoption_Level ~ Industry + Company_Size + Location + Salary_USD + Automation_Risk + Job_Growth_Projection + Cluster, 
+                                     data = train_set, importance = TRUE)
+
+# Generate predictions for each model on the test set
+lm_predictions <- predict(lm_model, test_set)  # Salary prediction
+rf_growth_predictions <- predict(rf_growth_model, test_set)  # Job Growth Projection prediction
+rf_ai_adoption_predictions <- predict(rf_ai_adoption_model, test_set)  # AI Adoption Level prediction
+
+# Step 5: Create a data frame that contains all the predictions
+ensemble_data <- data.frame(
+  lm_predicted_salary = lm_predictions,
+  rf_growth_predicted = as.numeric(rf_growth_predictions),  # Convert to numeric if needed
+  rf_ai_adoption_predicted = as.numeric(rf_ai_adoption_predictions),  # Convert to numeric if needed
+  actual_job_growth = test_set$Job_Growth_Projection,  # Keep as factor
+  actual_ai_adoption = test_set$AI_Adoption_Level,  # Keep as factor
+  actual_salary = test_set$Salary_USD,  # Actual Salary
+  Cluster = test_set$Cluster  # Add cluster information
+)
+
+# Step 6: Meta-model (Random Forest) for classification (Job Growth Projection)
+meta_model <- randomForest(actual_job_growth ~ lm_predicted_salary + rf_growth_predicted + rf_ai_adoption_predicted + Cluster,
+                           data = ensemble_data)
+
+# Make predictions on the ensemble model
+meta_predictions <- predict(meta_model, newdata = ensemble_data)
+
+# Evaluate the performance of the ensemble model
+conf_matrix <- confusionMatrix(meta_predictions, ensemble_data$actual_job_growth)
+conf_matrix
+
+
+```
