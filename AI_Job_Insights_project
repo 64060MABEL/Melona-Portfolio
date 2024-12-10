@@ -212,10 +212,6 @@ cat("Percentage of Jobs with Decline Projection:", decline_percentage, "%\n")
 
 
 
-
-
-# Assuming your dataframe is named 'jobs'
-
 # Filter jobs based on specific job growth projection categories
 
 # For example, to see jobs with growth projection:
@@ -238,14 +234,11 @@ head("Jobs with Decline Projection:")
 head(decline_jobs)
 
 
-
-
 #Applying label encoding to ordinal variables
 jobs$AI_Adoption_Level <- as.numeric(factor(jobs$AI_Adoption_Level))
 jobs$Automation_Risk <- as.numeric(factor(jobs$Automation_Risk))
 jobs$Job_Growth_Projection <- as.numeric(factor(jobs$Job_Growth_Projection))
 head(jobs)
-
 
 #Job count based on Company size
 
@@ -257,7 +250,6 @@ jobs_by_company_size <- jobs %>%
 
 # View the result
 head(jobs_by_company_size)
-
 
 # Load necessary library
 library(dplyr)
@@ -312,9 +304,6 @@ r_squared <- summary(linear_model)$r.squared
 # Output the evaluation metrics
 cat("Root Mean Squared Error (RMSE):", rmse, "\n")
 cat("R-squared:", r_squared, "\n")
-
-
-
 ```
 
 #### Random Forest model for Classifying Job Growth Projections
